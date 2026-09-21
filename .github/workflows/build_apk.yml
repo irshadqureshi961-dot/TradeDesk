@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: TradeDesk
 
     steps:
       - name: Checkout Repository
@@ -38,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: TradeDesk-Release-APK
-          path: TradeDesk/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
