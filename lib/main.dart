@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/add_trade_screen.dart';
+import 'screens/analytics_screen.dart';
+import 'screens/calendar_screen.dart';
 
 void main() {
   runApp(const TradeDeskApp());
@@ -37,8 +39,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<Widget> _pages = [
     const DashboardView(),
-    const Center(child: Text('Analytics View', style: TextStyle(color: Colors.white))),
-    const Center(child: Text('Calendar View', style: TextStyle(color: Colors.white))),
+    const AnalyticsScreen(),
+    const CalendarScreen(),
   ];
 
   @override
