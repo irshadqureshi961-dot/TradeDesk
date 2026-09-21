@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../models/trade.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -31,14 +32,25 @@ class DatabaseHelper {
         symbol TEXT NOT NULL,
         type TEXT NOT NULL,
         entryPrice REAL NOT NULL,
-        exitPrice REAL,
+        exitPrice REAL NOT NULL,
         stopLoss REAL NOT NULL,
         takeProfit REAL NOT NULL,
         lots REAL NOT NULL,
-        pnl REAL,
+        pnl REAL NOT NULL,
         notes TEXT,
         date TEXT NOT NULL
       )
     ''');
+  }
+
+  Future<int> insertTrade(Trade trade) async {
+    final db = await instance.database;
+    return await db.insert('trades', trade.toMap());
+  }
+
+  Future<List<Trade>> getAllTrades() async {
+    final db = await instance.database;
+    final result = await db.query('trades', orderBy: 'id DESC');
+    return result.map((json) => Trade.fromMap(json)).toList();
   }
 }

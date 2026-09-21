@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/trade.dart';
+import '../services/database_helper.dart';
 
 class AddTradeScreen extends StatefulWidget {
   const AddTradeScreen({super.key});
@@ -12,9 +14,11 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
   String _symbol = 'XAUUSD';
   String _type = 'BUY';
   double _entryPrice = 0.0;
+  double _exitPrice = 0.0;
   double _stopLoss = 0.0;
   double _takeProfit = 0.0;
   double _lots = 0.01;
+  double _pnl = 0.0;
   String _notes = '';
 
   @override
@@ -62,6 +66,11 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
                 onSaved: (val) => _entryPrice = double.tryParse(val ?? '0') ?? 0.0,
               ),
               TextFormField(
+                decoration: const InputDecoration(labelText: 'Exit Price'),
+                keyboardType: TextInputType.number,
+                onSaved: (val) => _exitPrice = double.tryParse(val ?? '0') ?? 0.0,
+              ),
+              TextFormField(
                 decoration: const InputDecoration(labelText: 'Stop Loss'),
                 keyboardType: TextInputType.number,
                 onSaved: (val) => _stopLoss = double.tryParse(val ?? '0') ?? 0.0,
@@ -77,16 +86,34 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
                 onSaved: (val) => _lots = double.tryParse(val ?? '0.01') ?? 0.01,
               ),
               TextFormField(
+                decoration: const InputDecoration(labelText: 'Profit / Loss (\$)'),
+                keyboardType: TextInputType.number,
+                onSaved: (val) => _pnl = double.tryParse(val ?? '0') ?? 0.0,
+              ),
+              TextFormField(
                 decoration: const InputDecoration(labelText: 'Notes / Setup'),
-                maxLines: 3,
+                maxLines: 2,
                 onSaved: (val) => _notes = val ?? '',
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
-                    Navigator.pop(context);
+                    final trade = Trade(
+                      symbol: _symbol,
+                      type: _type,
+                      entryPrice: _entryPrice,
+                      exitPrice: _exitPrice,
+                      stopLoss: _stopLoss,
+                      takeProfit: _takeProfit,
+                      lots: _lots,
+                      pnl: _pnl,
+                      notes: _notes,
+                      date: DateTime.now().toIso8601String().split('T')[0],
+                    );
+                    await DatabaseHelper.instance.insertTrade(trade);
+                    if (context.mounted) Navigator.pop(context, true);
                   }
                 },
                 child: const Text('Save Trade Entry'),
