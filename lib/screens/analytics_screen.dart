@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class AnalyticsScreen extends StatelessWidget {
   const AnalyticsScreen({super.key});
@@ -33,13 +34,46 @@ class AnalyticsScreen extends StatelessWidget {
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Equity Curve', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 40),
-                  Center(child: Text('Chart rendering ready for trade history', style: TextStyle(color: Colors.grey))),
-                  SizedBox(height: 40),
+                  const Text(
+                    'Equity Curve',
+                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 200,
+                    child: LineChart(
+                      LineChartData(
+                        gridData: const FlGridData(show: false),
+                        titlesData: const FlTitlesData(show: false),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: const [
+                              FlSpot(0, 100000),
+                              FlSpot(1, 100500),
+                              FlSpot(2, 99800),
+                              FlSpot(3, 101200),
+                              FlSpot(4, 102500),
+                              FlSpot(5, 101900),
+                              FlSpot(6, 103800),
+                            ],
+                            isCurved: true,
+                            color: Colors.blueAccent,
+                            barWidth: 3,
+                            isStrokeCapRound: true,
+                            dotData: const FlDotData(show: false),
+                            belowBarData: BarAreaData(
+                              show: true,
+                              color: Colors.blueAccent.withOpacity(0.15),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
