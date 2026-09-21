@@ -1,122 +1,95 @@
 import 'package:flutter/material.dart';
-import '../services/trading_calculator.dart';
 
 class AddTradeScreen extends StatefulWidget {
-  final double accountBalance;
-
-  const AddTradeScreen({Key? key, required this.accountBalance}) : super(key: key);
+  const AddTradeScreen({super.key});
 
   @override
   State<AddTradeScreen> createState() => _AddTradeScreenState();
 }
 
 class _AddTradeScreenState extends State<AddTradeScreen> {
-  final _symbolController = TextEditingController(text: 'EURUSD');
-  final _entryController = TextEditingController();
-  final _slController = TextEditingController();
-  final _riskPctController = TextEditingController(text: '1.0');
-  
-  double _calculatedLotSize = 0.0;
-  double _suggestedTP = 0.0;
-  String _direction = 'BUY';
-
-  void _calculatePosition() {
-    double entry = double.tryParse(_entryController.text) ?? 0.0;
-    double sl = double.tryParse(_slController.text) ?? 0.0;
-    double riskPct = double.tryParse(_riskPctController.text) ?? 1.0;
-
-    if (entry > 0 && sl > 0) {
-      setState(() {
-        _calculatedLotSize = TradingCalculator.calculateLotSize(
-          accountBalance: widget.accountBalance,
-          riskPct: riskPct,
-          entryPrice: entry,
-          stopLossPrice: sl,
-          symbol: _symbolController.text,
-        );
-
-        _suggestedTP = TradingCalculator.calculateSuggestedTP(
-          entryPrice: entry,
-          stopLossPrice: sl,
-          direction: _direction,
-          targetRR: 2.0,
-        );
-      });
-    }
-  }
+  final _formKey = GlobalKey<FormState>();
+  String _symbol = 'XAUUSD';
+  String _type = 'BUY';
+  double _entryPrice = 0.0;
+  double _stopLoss = 0.0;
+  double _takeProfit = 0.0;
+  double _lots = 0.01;
+  String _notes = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1419),
-      appBar: AppBar(
-        title: const Text('Log New Trade'),
-        backgroundColor: const Color(0xFF161E2E),
-      ),
+      appBar: AppBar(title: const Text('Log New Trade')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
+        child: Form(
+          key: _formKey,
+          child: ListView(
             children: [
-              TextField(
-                controller: _symbolController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Instrument (e.g. EURUSD, XAUUSD)',
-                  labelStyle: TextStyle(color: Colors.grey),
-                ),
-                onChanged: (_) => _calculatePosition(),
+              DropdownButtonFormField<String>(
+                value: _symbol,
+                items: ['XAUUSD', 'EURUSD', 'GBPUSD', 'US30', 'NAS100']
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
+                onChanged: (val) => setState(() => _symbol = val!),
+                decoration: const InputDecoration(labelText: 'Symbol'),
               ),
               const SizedBox(height: 12),
-              TextField(
-                controller: _entryController,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Entry Price',
-                  labelStyle: TextStyle(color: Colors.grey),
-                ),
-                onChanged: (_) => _calculatePosition(),
+              Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: const Text('BUY'),
+                      value: 'BUY',
+                      groupValue: _type,
+                      onChanged: (val) => setState(() => _type = val!),
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: const Text('SELL'),
+                      value: 'SELL',
+                      groupValue: _type,
+                      onChanged: (val) => setState(() => _type = val!),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _slController,
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Entry Price'),
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Stop Loss Price',
-                  labelStyle: TextStyle(color: Colors.grey),
-                ),
-                onChanged: (_) => _calculatePosition(),
+                onSaved: (val) => _entryPrice = double.tryParse(val ?? '0') ?? 0.0,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Stop Loss'),
+                keyboardType: TextInputType.number,
+                onSaved: (val) => _stopLoss = double.tryParse(val ?? '0') ?? 0.0,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Take Profit'),
+                keyboardType: TextInputType.number,
+                onSaved: (val) => _takeProfit = double.tryParse(val ?? '0') ?? 0.0,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Lot Size'),
+                keyboardType: TextInputType.number,
+                onSaved: (val) => _lots = double.tryParse(val ?? '0.01') ?? 0.01,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Notes / Setup'),
+                maxLines: 3,
+                onSaved: (val) => _notes = val ?? '',
               ),
               const SizedBox(height: 20),
-
-              // Position Calculator Results Box
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Calculated Lot Size:', style: TextStyle(color: Colors.grey)),
-                        Text('$_calculatedLotSize Lots', style: const TextStyle(color: Colors.greenAccent, fontSize: 18, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Suggested TP (1:2 R:R):', style: TextStyle(color: Colors.grey)),
-                        Text(_suggestedTP.toStringAsFixed(4), style: const TextStyle(color: Colors.white, fontSize: 16)),
-                      ],
-                    ),
-                  ],
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Save Trade Entry'),
               ),
             ],
           ),
